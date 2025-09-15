@@ -52,6 +52,43 @@ class PlayerController:
         """
         pass
 
+ # PSEUDO CODE FOR GAME TREE
+ #class Gametree:
+ #board_state
+ #move
+ #player
+ #children: []
+
+ #Function name(self, next_player) --> generate all possible moves for next_player on this board 
+ #define possible moves (???)
+ #for move in possible moves:
+    # new_board = .....
+    #apply move to new_board
+    # child_node = Gametree(new_board, move, next_player)
+    # self.children.append(child_node)    
+#return self.children
+
+class GameTreeNode:
+    def __init__(self, board, move=None, player=None):
+        self.board = board            # Board state at this node
+        self.move = move              # Move that led to this node
+        self.player = player          # Player who made the move
+        self.children = []            # List of child GameTreeNode objects
+
+    def generate_children(self, next_player):
+        # Generate all possible moves from this board state
+        possible_moves = self.board.get_possible_moves()
+        for move in possible_moves:
+            new_board = self.board.copy()
+            new_board.apply_move(move, next_player)
+            child_node = GameTreeNode(new_board, move, next_player)
+            self.children.append(child_node)
+
+   #unsure if this is correct 
+   # def print_tree(self, depth=0):
+       # print("  " * depth + f"Move: {self.move}, Player: {self.player}")
+        #for child in self.children:
+            #child.print_tree(depth + 1)
 
 class MinMaxPlayer(PlayerController):
     """Class for the minmax player using the minmax algorithm
