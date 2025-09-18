@@ -148,7 +148,7 @@ class Board:
                 output += f'| {node} '
             output += '|'
         output += f'\n{divider2}\n{number_row}\n'
-         
+        
         return output
 
     def get_possible_moves(self):
@@ -157,5 +157,5 @@ class Board:
         for col in range(self.width):
             if self.is_valid(col):
                 possible_moves.append(col)
-
+        print(possible_moves)
         return possible_moves

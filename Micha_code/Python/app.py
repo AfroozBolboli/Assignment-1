@@ -164,11 +164,6 @@ if __name__ == '__main__':
     assert 1 < game_n <= min(width, height), 'game_n is not possible'
 
     board: Board = Board(width, height)
-    from players import GameTreeNode
-    print("Testing Tree Structure... n")
-    tree = GameTreeNode(board)
-    tree.generate_children(next_player=1)
-    tree.print_tree()
     start_game(game_n, board, get_players(game_n))
     
     

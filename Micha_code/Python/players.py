@@ -83,6 +83,7 @@ class GameTreeNode:
             new_board.play(move, next_player)
             child_node = GameTreeNode(new_board, move, next_player)
             self.children.append(child_node)
+            print('child', move+1, new_board)
 
    #unsure if this is correct 
     def print_tree(self, depth=0):
@@ -196,6 +197,7 @@ class HumanPlayer(PlayerController):
         """
         print(board)
 
+
         if self.heuristic is not None:
             print(f'Heuristic {self.heuristic} calculated the best move is:', end=' ')
             print(self.heuristic.get_best_action(self.player_id, board) + 1, end='\n\n')
@@ -203,6 +205,11 @@ class HumanPlayer(PlayerController):
         col: int = self.ask_input(board)
 
         print(f'Selected column: {col}')
+        from players import GameTreeNode
+        print("Testing Tree Structure... n")
+        tree = GameTreeNode(board)
+        tree.generate_children(next_player=1)
+        #tree.print_tree()
         return col - 1
     
 
