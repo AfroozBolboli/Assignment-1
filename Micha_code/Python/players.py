@@ -79,16 +79,17 @@ class GameTreeNode:
         # Generate all possible moves from this board state
         possible_moves = self.board.get_possible_moves()
         for move in possible_moves:
-            new_board = self.board.copy()
-            new_board.apply_move(move, next_player)
+            new_board = self.board.get_new_board(move, next_player)
+            new_board.play(move, next_player)
             child_node = GameTreeNode(new_board, move, next_player)
             self.children.append(child_node)
 
    #unsure if this is correct 
-   # def print_tree(self, depth=0):
-       # print("  " * depth + f"Move: {self.move}, Player: {self.player}")
-        #for child in self.children:
-            #child.print_tree(depth + 1)
+    def print_tree(self, depth=0):
+        print("  " * depth + f"Move: {self.move}, Player: {self.player}")
+        print("Childeren", self.children,"\n")
+        for child in self.children:
+            child.print_tree(depth + 1)
 
 class MinMaxPlayer(PlayerController):
     """Class for the minmax player using the minmax algorithm
