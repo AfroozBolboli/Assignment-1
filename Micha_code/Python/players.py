@@ -75,22 +75,15 @@ class GameTreeNode:
         self.player = player          # Player who made the move
         self.children = []            # List of child GameTreeNode objects
 
-    def generate_children(self, next_player):
+    def create_children(self, next_player):
         # Generate all possible moves from this board state
         possible_moves = self.board.get_possible_moves()
         for move in possible_moves:
             new_board = self.board.get_new_board(move, next_player)
-            new_board.play(move, next_player)
             child_node = GameTreeNode(new_board, move, next_player)
             self.children.append(child_node)
-            print('child', move+1, new_board)
+            #print('child', move+1, new_board)
 
-   #unsure if this is correct 
-    def print_tree(self, depth=0):
-        print("  " * depth + f"Move: {self.move}, Player: {self.player}")
-        print("Childeren", self.children,"\n")
-        for child in self.children:
-            child.print_tree(depth + 1)
 
 class MinMaxPlayer(PlayerController):
     """Class for the minmax player using the minmax algorithm
@@ -205,10 +198,8 @@ class HumanPlayer(PlayerController):
         col: int = self.ask_input(board)
 
         print(f'Selected column: {col}')
-        from players import GameTreeNode
-        print("Testing Tree Structure... n")
-        tree = GameTreeNode(board)
-        tree.generate_children(next_player=1)
+
+
         #tree.print_tree()
         return col - 1
     
