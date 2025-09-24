@@ -131,34 +131,22 @@ def winning(state: np.ndarray, game_n: int) -> int:
     
 
 def get_players(game_n: int) -> List[PlayerController]:
-    """Gets the two players
-
-    Args:
-        game_n (int): n in a row required to win
-
-    Raises:
-        AssertionError: if the players are incorrectly initialised
-
-    Returns:
-        List[PlayerController]: list with two players
-    """
+    """Gets the two players"""
+    # heuristic = an evaluation function for board states
+    #game n is the number of pieces in a row needed to win
     heuristic1: Heuristic = SimpleHeuristic(game_n)
     heuristic2: Heuristic = SimpleHeuristic(game_n)
 
-    human1: PlayerController = HumanPlayer(1, game_n, heuristic1)
-    human2: PlayerController = HumanPlayer(2, game_n, heuristic2)
+    # human vs alphabeta
+    p1 = HumanPlayer(1, game_n, heuristic1)
+    p2 = AlphaBetaPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
 
-    # TODO: Implement other PlayerControllers (MinMaxPlayer and AlphaBetaPlayer)
+    players: List[PlayerController] = [p1, p2]
 
-    players: List[PlayerController] = [human1, human2]
-
-    assert players[0].player_id in {1, 2}, 'The player_id of the first player must be either 1 or 2'
-    assert players[1].player_id in {1, 2}, 'The player_id of the second player must be either 1 or 2'
-    assert players[0].player_id != players[1].player_id, 'The players must have an unique player_id'
-    assert players[0].heuristic is not players[1].heuristic, 'The players must have an unique heuristic'
-    assert len(players) == 2, 'Not the correct amount of players'
+    # Still need to implement a sanity check
 
     return players
+
 
 
 if __name__ == '__main__':

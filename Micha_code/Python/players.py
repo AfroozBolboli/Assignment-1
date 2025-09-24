@@ -135,34 +135,82 @@ class MinMaxPlayer(PlayerController):
         return max_move
     
 
+#PSEUDO CODE FOR ALPHA BETA PRUNING
+#Alpha is the best value that the maximizer currently can guarantee at that level 
+#Beta is the best value that the minimizer currently can guarantee at that level 
+# function alphaBeta(node, depth, α, β, maximizingPlayer):
+    #if depth == 0 or node is terminal:
+       # return evaluate(node)
+
+   # if maximizingPlayer:
+       # d := -∞
+       # for each child of node:
+            #d := max(d, alphaBeta(child, depth-1, α, β, false))
+           #alpha := max(alpha, d)
+            #if alpha ≥ β:
+                #break   // β cutoff
+       # return value
+   # else:
+       # value := +∞
+       # for each child of node:
+         #   c := min(c, alphaBeta(child, depth-1, α, β, true))
+          #  beta := min(beta, value)
+           # if beta ≤ α:
+             #   break alpha cutoff
+       # return c
+    
+    
+
 class AlphaBetaPlayer(PlayerController):
     """Class for the minmax player using the minmax algorithm with alpha-beta pruning
-    Inherits from Playercontroller
+    Inherits from PlayerController
     """
     def __init__(self, player_id: int, game_n: int, depth: int, heuristic: Heuristic) -> None:
-        """
-        Args:
-            player_id (int): id of a player, can take values 1 or 2 (0 = empty)
-            game_n (int): n in a row required to win
-            depth (int): the max search depth
-            heuristic (Heuristic): heuristic used by the player
-        """
         super().__init__(player_id, game_n, heuristic)
         self.depth: int = depth
 
-
     def make_move(self, board: Board) -> int:
-        """Gets the column for the player to play in
+        best_val, best_move = -np.inf, None
+        alpha, beta = -np.inf, np.inf
 
-        Args:
-            board (Board): the current board
+        for move in board.get_possible_moves():
+            new_board = board.get_new_board(move, self.player_id)
+            val = self._alphabeta(new_board, self.depth - 1, alpha, beta, False)
+            if val > best_val:
+                best_val, best_move = val, move
+            alpha = max(alpha, best_val)
 
-        Returns:
-            int: column to play in
-        """
+        return best_move
 
-        # TODO: implement minmax algorithm with alpha beta pruning!
-        return 0
+    def _alphabeta(self, board: Board, depth: int, alpha: float, beta: float, maximizing: bool) -> float:
+        # stop at depth or if no moves left
+        if depth == 0 or not board.get_possible_moves():
+            return self.heuristic.evaluate_board(self.player_id, board)
+
+        if maximizing:
+            value = -np.inf
+            for move in board.get_possible_moves():
+                value = max(value, self._alphabeta(
+                    board.get_new_board(move, self.player_id),
+                    depth - 1, alpha, beta, False
+                ))
+                if value >= beta:  # beta cutoff
+                    break
+                alpha = max(alpha, value)
+            return value
+        else:
+            opponent = 3 - self.player_id
+            value = np.inf
+            for move in board.get_possible_moves():
+                value = min(value, self._alphabeta(
+                    board.get_new_board(move, opponent),
+                    depth - 1, alpha, beta, True
+                ))
+                if value <= alpha:  # alpha cutoff
+                    break
+                beta = min(beta, value)
+            return value
+
 
 
 class HumanPlayer(PlayerController):
