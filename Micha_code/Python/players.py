@@ -169,11 +169,16 @@ class AlphaBetaPlayer(PlayerController):
         super().__init__(player_id, game_n, heuristic)
         self.depth: int = depth
 
-    def make_move(self, board: Board) -> int:
+    def make_move(self, board: 'Board') -> int:
         best_val, best_move = -np.inf, None
         alpha, beta = -np.inf, np.inf
 
-        for move in board.get_possible_moves():
+        possible_moves = board.get_possible_moves()
+        if not possible_moves:
+            return 0  # fallback if no valid moves
+        best_move = possible_moves[0]  # ensure a valid move
+
+        for move in possible_moves:
             new_board = board.get_new_board(move, self.player_id)
             val = self._alphabeta(new_board, self.depth - 1, alpha, beta, False)
             if val > best_val:
@@ -182,14 +187,26 @@ class AlphaBetaPlayer(PlayerController):
 
         return best_move
 
-    def _alphabeta(self, board: Board, depth: int, alpha: float, beta: float, maximizing: bool) -> float:
-        # stop at depth or if no moves left
-        if depth == 0 or not board.get_possible_moves():
-            return self.heuristic.evaluate_board(self.player_id, board)
+    def _alphabeta(self, board: 'Board', depth: int, alpha: float, beta: float, maximizing: bool) -> float:
+        # stop at depth or if game is won
+        from app import winning  # import the winning function
+
+        winner = winning(board.get_board_state(), self.game_n)
+        if depth == 0 or winner != 0:
+            if winner == self.player_id:
+                return 1e6  # positive
+            elif winner == 3 - self.player_id:
+                return -1e6  #negative
+            else:
+                return 0  # depth limit reached
+
+        possible_moves = board.get_possible_moves()
+        if not possible_moves:
+            return 0  # no moves left
 
         if maximizing:
             value = -np.inf
-            for move in board.get_possible_moves():
+            for move in possible_moves:
                 value = max(value, self._alphabeta(
                     board.get_new_board(move, self.player_id),
                     depth - 1, alpha, beta, False
@@ -201,7 +218,7 @@ class AlphaBetaPlayer(PlayerController):
         else:
             opponent = 3 - self.player_id
             value = np.inf
-            for move in board.get_possible_moves():
+            for move in possible_moves:
                 value = min(value, self._alphabeta(
                     board.get_new_board(move, opponent),
                     depth - 1, alpha, beta, True
