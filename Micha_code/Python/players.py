@@ -82,12 +82,13 @@ class GameTreeNode:
             new_board = self.board.get_new_board(move, next_player)
             child_node = GameTreeNode(new_board, move, next_player)
             self.children.append(child_node)
+            print(self.children)
             #print('child', move+1, new_board)
 
 
 class MinMaxPlayer(PlayerController):
-    """Class for the minmax player using the minmax algorithm
-    Inherits from Playercontroller
+    """Class for the MinMax player using the MinMax algorithm
+    Inherits from PlayerController
     """
     def __init__(self, player_id: int, game_n: int, depth: int, heuristic: Heuristic) -> None:
         """
@@ -98,41 +99,64 @@ class MinMaxPlayer(PlayerController):
             heuristic (Heuristic): heuristic used by the player
         """
         super().__init__(player_id, game_n, heuristic)
-        self.depth: int = depth
-
+        self.depth = depth
 
     def make_move(self, board: Board) -> int:
-        """Gets the column for the player to play in
+        """
+        Decides the best move by running the MinMax algorithm to the given depth.
 
         Args:
-            board (Board): the current board
+            board (Board): current board state
 
         Returns:
             int: column to play in
         """
+        # root of the game tree
+        root = GameTreeNode(board)
 
-        # TODO: implement minmax algortihm!
-        # INT: use the functions on the 'board' object to produce a new board given a specific move
-        # HINT: use the functions on the 'heuristic' object to produce evaluations for the different board states!
+        best_value = -np.inf
+        best_move = 0
+
+        # all possible moves for the current player maybe i am redoing cause we have it in 
+        #the tree as well
+        for move in board.get_possible_moves():
+            new_board = board.get_new_board(move, self.player_id)
+            child_node = GameTreeNode(new_board, move, self.player_id)
+            value = self._minmax(child_node, self.depth - 1, False)  # False = minimizing opponent
+
+            if value > best_value:
+                best_value = value
+                best_move = move
+
+        return best_move
+
+    def _minmax(self, node: GameTreeNode, depth: int, maximizing_player: bool) -> int:
         
-        # Example:
-        max_value: float = -np.inf # negative infinity
-        max_move: int = 0
-        for col in range(board.width):
-            if board.is_valid(col):
-                new_board: Board = board.get_new_board(col, self.player_id)
-                value: int = self.heuristic.evaluate_board(self.player_id, new_board)
-                if value > max_value:
-                    max_move = col
+        #recurssion demon MinMax function.
+        
+        winner = Heuristic.winning(node.board.get_board_state(), self.game_n)
+        
+        # depth 0
+        if depth == 0 or winner != 0:
+            return self.heuristic.evaluate_board(self.player_id, node.board)
 
-        # This returns the same as
-        self.heuristic.get_best_action(self.player_id, board) # Very useful helper function!
-
-        # This is obviously not enough (this is depth 1)
-        # Your assignment is to create a data structure (tree) to store the gameboards such that you can evaluate a higher depths.
-        # Then, use the minmax algorithm to search through this tree to find the best move/action to take!
-
-        return max_move
+        if maximizing_player:
+            max_eval = -np.inf
+            for move in node.board.get_possible_moves():
+                new_board = node.board.get_new_board(move, self.player_id)
+                child = GameTreeNode(new_board, move, self.player_id)
+                eval = self._minmax(child, depth - 1, False)
+                max_eval = max(max_eval, eval)
+            return max_eval
+        else:
+            min_eval = np.inf
+            opponent = 1 if self.player_id == 2 else 2
+            for move in node.board.get_possible_moves():
+                new_board = node.board.get_new_board(move, opponent)
+                child = GameTreeNode(new_board, move, opponent)
+                eval = self._minmax(child, depth - 1, True)
+                min_eval = min(min_eval, eval)
+            return min_eval
     
 
 #PSEUDO CODE FOR ALPHA BETA PRUNING

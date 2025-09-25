@@ -33,7 +33,7 @@ def start_game(game_n: int, board: Board, players: List[PlayerController]) -> in
         """from players import GameTreeNode
         print("Testing Tree Structure... n")
         tree = GameTreeNode(board)
-        tree.create_children(next_player=1)"""
+        tree.generate_children(next_player=1)"""
         
         current_player_index = 1 - current_player_index
         winner = winning(board.get_board_state(), game_n)
