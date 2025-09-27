@@ -87,6 +87,7 @@ class GameTreeNode:
 
 
 class MinMaxPlayer(PlayerController):
+    
     """Class for the MinMax player using the MinMax algorithm
     Inherits from PlayerController
     """
@@ -98,66 +99,72 @@ class MinMaxPlayer(PlayerController):
             depth (int): the max search depth
             heuristic (Heuristic): heuristic used by the player
         """
+
         super().__init__(player_id, game_n, heuristic)
         self.depth = depth
 
+
     def make_move(self, board: Board) -> int:
-        """
-        Decides the best move by running the MinMax algorithm to the given depth.
-
+        """Gets the column for the player to play in
         Args:
-            board (Board): current board state
-
+            board (Board): the current board
         Returns:
             int: column to play in
         """
-        # root of the game tree
-        root = GameTreeNode(board)
-
-        best_value = -np.inf
-        best_move = 0
-
-        # all possible moves for the current player maybe i am redoing cause we have it in 
-        #the tree as well
-        for move in board.get_possible_moves():
-            new_board = board.get_new_board(move, self.player_id)
-            child_node = GameTreeNode(new_board, move, self.player_id)
-            value = self._minmax(child_node, self.depth - 1, False)  # False = minimizing opponent
-
-            if value > best_value:
-                best_value = value
-                best_move = move
-
-        return best_move
-
-    def _minmax(self, node: GameTreeNode, depth: int, maximizing_player: bool) -> int:
+        possible_moves = board.get_possible_moves()
+        if not possible_moves:
+            return 0
         
-        #recurssion demon MinMax function.
-        
-        winner = Heuristic.winning(node.board.get_board_state(), self.game_n)
-        
-        # depth 0
+        max_value: float = -np.inf # negative infinity
+        max_move: int = 0
+        for col in range(board.width):
+            if board.is_valid(col):
+                new_board: Board = board.get_new_board(col, self.player_id)
+                # Calling the recursion depth-1 because we have already evaluated one level 
+                # Maximmize false because next round is the other player's turn
+                value: float = self._minmaxAlgorithm(new_board, self.depth - 1, is_maximizing=False)
+                if value > max_value:
+                    max_value = value 
+                    max_move = col
+        return max_move
+
+    def _minmaxAlgorithm(self, board: Board, depth: int, is_maximizing:bool):
+        possible_moves = board.get_possible_moves()
+        if not possible_moves:
+            return 0
+        from app import winning
+        winner = winning(board.get_board_state(), self.game_n)
         if depth == 0 or winner != 0:
-            return self.heuristic.evaluate_board(self.player_id, node.board)
-
-        if maximizing_player:
-            max_eval = -np.inf
-            for move in node.board.get_possible_moves():
-                new_board = node.board.get_new_board(move, self.player_id)
-                child = GameTreeNode(new_board, move, self.player_id)
-                eval = self._minmax(child, depth - 1, False)
-                max_eval = max(max_eval, eval)
-            return max_eval
+            if winner == self.player_id:
+                return 1e6
+            elif winner == (3 - self.player_id):
+                return -1e6
+            elif winner == -1:
+                return 0
+            else:
+                return self.heuristic.evaluate_board(self.player_id, board)
+            
+        if is_maximizing:
+            max_value = -np.inf
+            for col in range(board.width):
+                if board.is_valid(col):
+                    child = board.get_new_board(col, self.player_id)
+                    eval_score = self._minmaxAlgorithm(child, depth - 1, is_maximizing=False)
+                    max_value = max(eval_score, max_value)
+            return max_value
         else:
-            min_eval = np.inf
-            opponent = 1 if self.player_id == 2 else 2
-            for move in node.board.get_possible_moves():
-                new_board = node.board.get_new_board(move, opponent)
-                child = GameTreeNode(new_board, move, opponent)
-                eval = self._minmax(child, depth - 1, True)
-                min_eval = min(min_eval, eval)
-            return min_eval
-    
+            min_value = np.inf
+            if self.player_id == 1:
+                other_player = 2
+            else:
+                other_player = 1
+            for col in range(board.width):
+                if board.is_valid(col):
+                    child = board.get_new_board(col, other_player)
+                    eval_score = self._minmaxAlgorithm(child, depth - 1, is_maximizing=True)
+                    min_value = min(eval_score, min_value)
+            return min_value
+        
 
 #PSEUDO CODE FOR ALPHA BETA PRUNING
 #Alpha is the best value that the maximizer currently can guarantee at that level 

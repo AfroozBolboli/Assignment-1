@@ -139,7 +139,8 @@ def get_players(game_n: int) -> List[PlayerController]:
 
     # human vs alphabeta
     p1 = HumanPlayer(1, game_n, heuristic1)
-    p2 = AlphaBetaPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
+    #p2 = AlphaBetaPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
+    p2 = MinMaxPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
 
     players: List[PlayerController] = [p1, p2]
 
