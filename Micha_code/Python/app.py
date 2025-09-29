@@ -7,21 +7,11 @@ from numba import jit
 
 
 def start_game(game_n: int, board: Board, players: List[PlayerController]) -> int:
-    """Starting a game and handling the game logic
-
-    Args:
-        game_n (int): n in a row required to win
-        board (Board): board to play on
-        players (List[PlayerController]): players of the game
-
-    Returns:
-        int: id of the winning player, or -1 if the game ends in a draw
-    """
+    """Starting a game and handling the game logic"""
     print('Start game!')
-    current_player_index: int = 0 # index of the current player in the players list
+    current_player_index: int = 0
     winner: int = 0
 
-    # Main game loop
     while winner == 0:
         current_player: PlayerController = players[current_player_index]
         move: int = current_player.make_move(board)
@@ -29,16 +19,9 @@ def start_game(game_n: int, board: Board, players: List[PlayerController]) -> in
         while not board.play(move, current_player.player_id):
             move = current_player.make_move(board)
 
-        #testing the tree
-        """from players import GameTreeNode
-        print("Testing Tree Structure... n")
-        tree = GameTreeNode(board)
-        tree.generate_children(next_player=1)"""
-        
         current_player_index = 1 - current_player_index
         winner = winning(board.get_board_state(), game_n)
 
-    # Printing out winner, final board and number of evaluations after the game 
     print(board)
 
     if winner < 0:
@@ -54,15 +37,7 @@ def start_game(game_n: int, board: Board, players: List[PlayerController]) -> in
 
 @jit(nopython=True, cache=True)
 def winning(state: np.ndarray, game_n: int) -> int:
-    """Determines whether a player has won, and if so, which one
-
-    Args:
-        state (np.ndarray): the board to check
-        game_n (int): n in a row required to win
-
-    Returns:
-        int: 1 or 2 if the respective player won, -1 if the game is a draw, 0 otherwise
-    """
+    """Determines whether a player has won, and if so, which one"""
     player: int
     counter: int
 
@@ -80,8 +55,8 @@ def winning(state: np.ndarray, game_n: int) -> int:
             else:
                 counter = 1 
                 player = field
-            
-    # Horizintal check
+
+    # Horizontal check
     for row in state.T:
         counter = 0
         player = -1
@@ -109,7 +84,7 @@ def winning(state: np.ndarray, game_n: int) -> int:
                     break
             if player != -1:
                 return player
-            
+
     # Descending diagonal check
     for i, col in enumerate(state[game_n - 1:]):
         for j, field in enumerate(col[game_n - 1:]):
@@ -122,43 +97,34 @@ def winning(state: np.ndarray, game_n: int) -> int:
                     break
             if player != -1:
                 return player
-        
+
     # Check for a draw
     if np.all(state[:, 0]):
-        return -1 # The board is full, game is a draw
+        return -1  # The board is full, game is a draw
 
-    return 0 # Game is not over 
-    
+    return 0  # Game is not over
+
 
 def get_players(game_n: int) -> List[PlayerController]:
     """Gets the two players"""
-    # heuristic = an evaluation function for board states
-    #game n is the number of pieces in a row needed to win
     heuristic1: Heuristic = SimpleHeuristic(game_n)
     heuristic2: Heuristic = SimpleHeuristic(game_n)
 
-    # human vs alphabeta
+     # human vs alphabeta
     p1 = HumanPlayer(1, game_n, heuristic1)
-    #p2 = AlphaBetaPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
-    p2 = MinMaxPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
+    p2 = AlphaBetaPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
+    #p2 = MinMaxPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
 
-    players: List[PlayerController] = [p1, p2]
 
-    # Still need to implement a sanity check
-
-    return players
-
+    return [p1, p2]
 
 
 if __name__ == '__main__':
-    game_n: int = 4 # n in a row required to win
-    width: int = 7  # width of the board
-    height: int = 6 # height of the board
+    game_n: int = 4
+    width: int = 7
+    height: int = 6
 
-    # Check whether the game_n is possible
     assert 1 < game_n <= min(width, height), 'game_n is not possible'
 
     board: Board = Board(width, height)
     start_game(game_n, board, get_players(game_n))
-    
-    

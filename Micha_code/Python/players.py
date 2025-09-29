@@ -164,7 +164,7 @@ class MinMaxPlayer(PlayerController):
                     eval_score = self._minmaxAlgorithm(child, depth - 1, is_maximizing=True)
                     min_value = min(eval_score, min_value)
             return min_value
-        
+    
 
 #PSEUDO CODE FOR ALPHA BETA PRUNING
 #Alpha is the best value that the maximizer currently can guarantee at that level 
@@ -189,13 +189,99 @@ class MinMaxPlayer(PlayerController):
            # if beta ≤ α:
              #   break alpha cutoff
        # return c
-    
-    
-
+        
 class AlphaBetaPlayer(PlayerController):
-    """Class for the minmax player using the minmax algorithm with alpha-beta pruning
+    """Class for the MinMax player using the MinMax algorithm with alpha-beta pruning
     Inherits from PlayerController
     """
+    def __init__(self, player_id: int, game_n: int, depth: int, heuristic: Heuristic) -> None:
+        """
+        Args:
+            player_id (int): id of a player, can take values 1 or 2 (0 = empty)
+            game_n (int): n in a row required to win
+            depth (int): the max search depth
+            heuristic (Heuristic): heuristic used by the player
+        """
+        super().__init__(player_id, game_n, heuristic)
+        self.depth = depth
+
+    def make_move(self, board: Board) -> int:
+        """Gets the column for the player to play in
+
+        Args:
+            board (Board): the current board
+
+        Returns:
+            int: column to play in
+        """
+        possible_moves = board.get_possible_moves()
+        if not possible_moves:
+            return 0
+
+        max_value: float = -np.inf  
+        max_move: int = 0
+        alpha, beta = -np.inf, np.inf
+
+        for col in range(board.width):
+            if board.is_valid(col):
+                new_board: Board = board.get_new_board(col, self.player_id)
+                value: float = self._alphabeta(new_board, self.depth - 1, alpha, beta, is_maximizing=False)
+                if value > max_value:
+                    max_value = value
+                    max_move = col
+                alpha = max(alpha, max_value)
+
+        return max_move
+
+    def _alphabeta(self, board: Board, depth: int, alpha: float, beta: float, is_maximizing: bool) -> float:
+        # recursion demon AlphaBeta function
+        from app import winning
+        winner = winning(board.get_board_state(), self.game_n)
+
+        if depth == 0 or winner != 0:
+            if winner == self.player_id:
+                return 1e6
+            elif winner == 3 - self.player_id:
+                return -1e6
+            elif winner == -1:
+                return 0
+            else:
+                return self.heuristic.evaluate_board(self.player_id, board)
+
+        if is_maximizing:
+            max_value = -np.inf
+            for col in range(board.width):
+                if board.is_valid(col):
+                    child = board.get_new_board(col, self.player_id)
+                    eval_score = self._alphabeta(child, depth - 1, alpha, beta, is_maximizing=False)
+                    max_value = max(max_value, eval_score)
+                    alpha = max(alpha, max_value)
+                    if alpha >= beta:
+                        break  # beta cutoff
+            return max_value
+        else:
+            min_value = np.inf
+            opponent = 3 - self.player_id
+            for col in range(board.width):
+                if board.is_valid(col):
+                    child = board.get_new_board(col, opponent)
+                    eval_score = self._alphabeta(child, depth - 1, alpha, beta, is_maximizing=True)
+                    min_value = min(min_value, eval_score)
+                    beta = min(beta, min_value)
+                    if beta <= alpha:
+                        break  # alpha cutoff
+            return min_value
+
+        
+
+    
+
+    
+#old version!!!!
+"""class AlphaBetaPlayer(PlayerController):
+    Class for the minmax player using the minmax algorithm with alpha-beta pruning
+    Inherits from PlayerController
+
     def __init__(self, player_id: int, game_n: int, depth: int, heuristic: Heuristic) -> None:
         super().__init__(player_id, game_n, heuristic)
         self.depth: int = depth
@@ -257,9 +343,7 @@ class AlphaBetaPlayer(PlayerController):
                 if value <= alpha:  # alpha cutoff
                     break
                 beta = min(beta, value)
-            return value
-
-
+            return value"""
 
 class HumanPlayer(PlayerController):
     """Class for the human player
