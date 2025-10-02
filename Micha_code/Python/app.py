@@ -5,10 +5,10 @@ from typing import List
 import numpy as np
 from numba import jit
 
-
 def start_game(game_n: int, board: Board, players: List[PlayerController]) -> int:
     """Starting a game and handling the game logic"""
     print('Start game!')
+
     current_player_index: int = 0
     winner: int = 0
 
@@ -121,11 +121,14 @@ def get_players(game_n: int) -> List[PlayerController]:
 
 
 if __name__ == '__main__':
-    game_n: int = 4
-    width: int = 7
-    height: int = 6
+    N = int(input("Enter a number for the width and height of the grid:"))
+    M =  int(input("Enter a number for game_N lower than width and height of the grid:"))
+    game_n: int = M
+    width: int = N
+    height: int = N
 
     assert 1 < game_n <= min(width, height), 'game_n is not possible'
 
     board: Board = Board(width, height)
-    start_game(game_n, board, get_players(game_n))
+    if (N >2) :
+        start_game(game_n, board, get_players(game_n))
