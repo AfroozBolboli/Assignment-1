@@ -110,10 +110,11 @@ def get_players(game_n: int) -> List[PlayerController]:
     heuristic1: Heuristic = SimpleHeuristic(game_n)
     heuristic2: Heuristic = SimpleHeuristic(game_n)
 
+    #make sure to edit the player ID when changing players
      # human vs alphabeta
-    p1 = HumanPlayer(1, game_n, heuristic1)
-    p2 = AlphaBetaPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
-    #p2 = MinMaxPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
+    #p1 = HumanPlayer(1, game_n, heuristic1)
+    p1 = AlphaBetaPlayer(1, game_n, depth=4, heuristic=heuristic1) #depth = how many moves ahead the player looks
+    p2 = MinMaxPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
 
 
     return [p1, p2]
