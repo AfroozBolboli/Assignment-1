@@ -1,4 +1,4 @@
-from heuristics import Heuristic, SimpleHeuristic
+from heuristics import Heuristic, SimpleHeuristic, ProgressiveHeuristic
 from players import PlayerController, HumanPlayer, MinMaxPlayer, AlphaBetaPlayer
 from board import Board
 from typing import List
@@ -108,12 +108,12 @@ def winning(state: np.ndarray, game_n: int) -> int:
 def get_players(game_n: int) -> List[PlayerController]:
     """Gets the two players"""
     heuristic1: Heuristic = SimpleHeuristic(game_n)
-    heuristic2: Heuristic = SimpleHeuristic(game_n)
+    heuristic2: Heuristic = ProgressiveHeuristic(game_n)
 
     #make sure to edit the player ID when changing players
      # human vs alphabeta
     #p1 = HumanPlayer(1, game_n, heuristic1)
-    p1 = AlphaBetaPlayer(1, game_n, depth=4, heuristic=heuristic1) #depth = how many moves ahead the player looks
+    p1 = AlphaBetaPlayer(1, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
     p2 = MinMaxPlayer(2, game_n, depth=4, heuristic=heuristic2) #depth = how many moves ahead the player looks
 
 
@@ -121,14 +121,15 @@ def get_players(game_n: int) -> List[PlayerController]:
 
 
 if __name__ == '__main__':
-    N = int(input("Enter a number for the width and height of the grid:"))
-    M =  int(input("Enter a number for game_N lower than width and height of the grid:"))
-    game_n: int = M
-    width: int = N
-    height: int = N
+    W = int(input("Enter a number for the width of the grid:"))
+    H = int(input("Enter a number for the height of the grid:"))
+    N =  int(input("Enter a number for game_N lower than width and height of the grid:"))
+    game_n: int = N
+    width: int = W
+    height: int = H
 
     assert 1 < game_n <= min(width, height), 'game_n is not possible'
 
     board: Board = Board(width, height)
-    if (N >2) :
+    if (W >2 and H > 2) :
         start_game(game_n, board, get_players(game_n))

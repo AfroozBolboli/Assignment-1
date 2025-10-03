@@ -69,7 +69,7 @@ class GameTreeNode:
             new_board = self.board.get_new_board(move, next_player)
             child_node = GameTreeNode(new_board, move, next_player)
             self.children.append(child_node)
-            print(self.children)
+            #print(self.children)
             #print('child', move+1, new_board)
 
 
@@ -272,8 +272,6 @@ class HumanPlayer(PlayerController):
 
         print(f'Selected column: {col}')
 
-
-        #tree.print_tree()
         return col - 1
     
 

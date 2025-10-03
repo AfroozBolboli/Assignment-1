@@ -157,5 +157,5 @@ class Board:
         for col in range(self.width):
             if self.is_valid(col):
                 possible_moves.append(col)
-        print(possible_moves)
+        #print(possible_moves)
         return possible_moves

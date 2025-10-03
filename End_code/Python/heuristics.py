@@ -181,3 +181,72 @@ class SimpleHeuristic(Heuristic):
                         break
 
         return max_in_row
+
+class ProgressiveHeuristic(Heuristic):
+    """Heuristic that rewards all streaks progressively; longer streaks get higher score"""
+
+    def __init__(self, game_n: int) -> None:
+        super().__init__(game_n)
+
+    def _name(self) -> str:
+        return "Progressive"
+
+    @staticmethod
+    @jit(nopython=True, cache=True)
+    def _evaluate(player_id: int, state: np.ndarray, winner: int) -> int:
+
+        width: int
+        height: int
+        width, height = state.shape
+
+        if winner == player_id:
+            return 1000  # Bigger reward than simple heuristic 
+        elif winner > 0:
+            return -1000  # Worse punishment than simple heuristic 
+        elif winner < 0: # draw
+            return 0  
+
+        total_score: int = 0
+
+        for i in range(width):
+            for j in range(height):
+                if state[i, j] != player_id:
+                    continue
+
+                streak = 1
+                for x in range(1, width - i):
+                    if state[i + x, j] == player_id:
+                        streak += 1
+                    else:
+                        break
+                total_score += 2 ** streak - 1  # progressive formula
+
+                streak = 1
+                for y in range(1, height - j):
+                    if state[i, j + y] == player_id:
+                        streak += 1
+                    else:
+                        break
+                total_score += 2 ** streak - 1
+
+                # Check diagonal down (\)
+                streak = 1
+                for d in range(1, min(width - i, height - j)):
+                    if state[i + d, j + d] == player_id:
+                        streak += 1
+                    else:
+                        break
+                total_score += 2 ** streak - 1
+
+                # Check diagonal up (/)
+                streak = 1
+                for a in range(1, min(width - i, j)):
+                    if state[i + a, j - a] == player_id:
+                        streak += 1
+                    else:
+                        break
+                total_score += 2 ** streak - 1
+
+        return total_score
+
+    
