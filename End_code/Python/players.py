@@ -52,22 +52,9 @@ class PlayerController:
         """
         pass
 
- # PSEUDO CODE FOR GAME TREE
- #class Gametree:
- #board_state
- #move
- #player
- #children: []
 
- #Function name(self, next_player) --> generate all possible moves for next_player on this board 
- #define possible moves (???)
- #for move in possible moves:
-    # new_board = .....
-    #apply move to new_board
-    # child_node = Gametree(new_board, move, next_player)
-    # self.children.append(child_node)    
-#return self.children
-
+#GAMETREE NODE
+#TO ILLUSTRATE HOW TO MAKE A GAMETREE
 class GameTreeNode:
     def __init__(self, board, move=None, player=None):
         self.board = board            # Board state at this node
@@ -86,6 +73,7 @@ class GameTreeNode:
             #print('child', move+1, new_board)
 
 
+#MINMAX CODE
 class MinMaxPlayer(PlayerController):
     
     """Class for the MinMax player using the MinMax algorithm
@@ -164,32 +152,10 @@ class MinMaxPlayer(PlayerController):
                     eval_score = self._minmaxAlgorithm(child, depth - 1, is_maximizing=True)
                     min_value = min(eval_score, min_value)
             return min_value
-    
-
-#PSEUDO CODE FOR ALPHA BETA PRUNING
-#Alpha is the best value that the maximizer currently can guarantee at that level 
-#Beta is the best value that the minimizer currently can guarantee at that level 
-# function alphaBeta(node, depth, α, β, maximizingPlayer):
-    #if depth == 0 or node is terminal:
-       # return evaluate(node)
-
-   # if maximizingPlayer:
-       # d := -∞
-       # for each child of node:
-            #d := max(d, alphaBeta(child, depth-1, α, β, false))
-           #alpha := max(alpha, d)
-            #if alpha ≥ β:
-                #break   // β cutoff
-       # return value
-   # else:
-       # value := +∞
-       # for each child of node:
-         #   c := min(c, alphaBeta(child, depth-1, α, β, true))
-          #  beta := min(beta, value)
-           # if beta ≤ α:
-             #   break alpha cutoff
-       # return c
         
+
+#ALPHABETA PRUNING CODE
+#LARGELY SIMILAIR TO MINMAX WITH ADDED BOUNDS        
 class AlphaBetaPlayer(PlayerController):
     """Class for the MinMax player using the MinMax algorithm with alpha-beta pruning
     Inherits from PlayerController
@@ -271,79 +237,6 @@ class AlphaBetaPlayer(PlayerController):
                     if beta <= alpha:
                         break  # alpha cutoff
             return min_value
-
-        
-
-    
-
-    
-#old version!!!!
-"""class AlphaBetaPlayer(PlayerController):
-    Class for the minmax player using the minmax algorithm with alpha-beta pruning
-    Inherits from PlayerController
-
-    def __init__(self, player_id: int, game_n: int, depth: int, heuristic: Heuristic) -> None:
-        super().__init__(player_id, game_n, heuristic)
-        self.depth: int = depth
-
-    def make_move(self, board: 'Board') -> int:
-        best_val, best_move = -np.inf, None
-        alpha, beta = -np.inf, np.inf
-
-        possible_moves = board.get_possible_moves()
-        if not possible_moves:
-            return 0  # fallback if no valid moves
-        best_move = possible_moves[0]  # ensure a valid move
-
-        for move in possible_moves:
-            new_board = board.get_new_board(move, self.player_id)
-            val = self._alphabeta(new_board, self.depth - 1, alpha, beta, False)
-            if val > best_val:
-                best_val, best_move = val, move
-            alpha = max(alpha, best_val)
-
-        return best_move
-
-    def _alphabeta(self, board: 'Board', depth: int, alpha: float, beta: float, maximizing: bool) -> float:
-        # stop at depth or if game is won
-        from app import winning  # import the winning function
-
-        winner = winning(board.get_board_state(), self.game_n)
-        if depth == 0 or winner != 0:
-            if winner == self.player_id:
-                return 1e6  # positive
-            elif winner == 3 - self.player_id:
-                return -1e6  #negative
-            else:
-                return 0  # depth limit reached
-
-        possible_moves = board.get_possible_moves()
-        if not possible_moves:
-            return 0  # no moves left
-
-        if maximizing:
-            value = -np.inf
-            for move in possible_moves:
-                value = max(value, self._alphabeta(
-                    board.get_new_board(move, self.player_id),
-                    depth - 1, alpha, beta, False
-                ))
-                if value >= beta:  # beta cutoff
-                    break
-                alpha = max(alpha, value)
-            return value
-        else:
-            opponent = 3 - self.player_id
-            value = np.inf
-            for move in possible_moves:
-                value = min(value, self._alphabeta(
-                    board.get_new_board(move, opponent),
-                    depth - 1, alpha, beta, True
-                ))
-                if value <= alpha:  # alpha cutoff
-                    break
-                beta = min(beta, value)
-            return value"""
 
 class HumanPlayer(PlayerController):
     """Class for the human player
